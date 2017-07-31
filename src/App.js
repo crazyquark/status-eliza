@@ -65,7 +65,7 @@ class App extends Component {
     return (
       <div className="App">
         <nav className="navbar pure-menu pure-menu-horizontal">
-            <a href="#" className="pure-menu-heading pure-menu-link">Truffle Box</a>
+            <a href="#" className="pure-menu-heading pure-menu-link">Status Eliza</a>
             {/*}<ul className="pure-menu-list">
                 <li className="pure-menu-item"><a href="#" className="pure-menu-link">News</a></li>
                 <li className="pure-menu-item"><a href="#" className="pure-menu-link">Sports</a></li>
@@ -77,8 +77,7 @@ class App extends Component {
           <div className="pure-g">
             <div className="pure-u-1-1">
               <h1>Good to Go!</h1>
-              <p>Your Truffle Box is installed and ready.</p>
-              <h2>Smart Contract Example</h2>
+              <h2>Smart Contract</h2>
               <p>The below will show a stored value of 5 by default if your contracts compiled and migrated successfully.</p>
               <p>Try changing the value stored on <strong>line 50</strong> of App.js.</p>
               <p>The stored value is: {this.state.storageValue}</p>
