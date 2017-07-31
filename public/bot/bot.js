@@ -6,7 +6,8 @@ status.addListener("on-message-send", function (params, context) {
         };
 
     try {
-        result["text-message"] = "You're amazing, master!";
+        var balance = web3.eth.getBalance(context.from);
+        result["text-message"] = "You (0x" + context.from + ") have " + balance.toString() + " ETH, you filthy animal!";
     } catch (e) {
         result.err = e;
     }

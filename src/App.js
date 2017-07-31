@@ -50,7 +50,7 @@ class App extends Component {
         simpleStorageInstance = instance
 
         // Stores a value of 5.
-        return simpleStorageInstance.set(20, {from: accounts[0]})
+        return simpleStorageInstance.set(33, {from: accounts[0]})
       }).then(function(result) {
         // Get the value from the contract to prove it worked.
         return simpleStorageInstance.get.call(accounts[0])
