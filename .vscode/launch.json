@@ -12,7 +12,8 @@
             "env": {
                 "IP": "10.162.131.84",
                 "SERVER": "10.162.130.120"
-            }
+            },
+            "console": "integratedTerminal"
         }
     ]
 }
