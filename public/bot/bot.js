@@ -51,7 +51,7 @@ status.addListener('on-message-send', function (params, context) {
 
     var message = params.message;
 
-    if (message.indexOf('balance') !== -1) {
+    if (message.match(/balance/i)) {
         getMyBalance(context, result);
     } else {
         result['text-message'] = 'Sorry, I am not smart enough to understand that :(';
