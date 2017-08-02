@@ -1,5 +1,4 @@
 function fetchLocalData() {
-    console.log('Getting local data');
     return {
         49014:
         {
@@ -55,9 +54,12 @@ status.addListener('on-message-send', function (params, context) {
         getMyBalance(context, result);
     } else if (message.match(/status/i)) {
         var data = fetchLocalData();
-
+        
+        status.sendMessage('Let\'s see if I have anything for you...');
+        
         for (var tx in data) {
-            status.sendMessage('Transaction that needs confirmation: ' + tx);
+            if (tx)
+                status.sendMessage('Transaction that needs confirmation: ' + tx);
         };
     }
     else {
