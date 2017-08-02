@@ -36,6 +36,17 @@ function getMyBalance(context, result) {
     }
 }
 
+function getMyPendingTxs(result) {
+    var data = fetchLocalData();
+
+    result['text-message'] = ('Let\'s see if I have anything for you...\n');
+
+    for (var tx in data) {
+        if (tx)
+            result['text-message'] += '\nPending transaction: ' + tx;
+    };
+}
+
 status.addListener('init', function (params, context) {
     status.sendMessage('G\'day');
     status.sendMessage('I recognize keywords in chat like: balance, pending, status');
@@ -53,14 +64,7 @@ status.addListener('on-message-send', function (params, context) {
     if (message.match(/balance/i)) {
         getMyBalance(context, result);
     } else if (message.match(/status/i)) {
-        var data = fetchLocalData();
-        
-        status.sendMessage('Let\'s see if I have anything for you...');
-        
-        for (var tx in data) {
-            if (tx)
-                status.sendMessage('Transaction that needs confirmation: ' + tx);
-        };
+        getMyPendingTxs(result);
     }
     else {
         result['text-message'] = 'Sorry, I am not smart enough to understand that :(';
