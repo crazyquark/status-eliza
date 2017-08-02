@@ -1,5 +1,44 @@
+function fetchLocalData() {
+    console.log('Getting local data');
+    return {
+        49014:
+        {
+            details: 'The bank will pay for this transaction upon approval',
+        },
+        78900:
+        {
+            details: 'Please confirm you want your funds transfered out of account RX566900'
+        }
+    }
+}
+
+// TODO
+function fetchRemoteData() {
+    try {
+        fetch('http://10.162.130.120:7878/pending.json').then(function (data) {
+            status.sendMessage('Done!');
+            console.log('done');
+        }).catch(function (e) {
+            status.sendMessage('Failed!');
+            console.log('err');
+        });
+    } catch (e) {
+        status.sendMessage('Error!');
+        console.log('error');
+    }
+}
+
+function getMyBalance(context, result) {
+    try {
+        var balance = web3.fromWei(web3.eth.getBalance(context.from), 'ether');
+        result['text-message'] = 'Man, you (0x' + context.from + ') have ' + balance.toString() + ' ETH, you filthy animal!';
+    } catch (e) {
+        result.err = e;
+    }
+}
+
 status.addListener('init', function (params, context) {
-    status.sendMessage('G\'day');
+    status.sendMessage('G\'day, use /status to list your pending transactions');
 });
 
 status.addListener('on-message-send', function (params, context) {
@@ -9,28 +48,7 @@ status.addListener('on-message-send', function (params, context) {
         messages: []
     };
 
-    try {
-        var balance = web3.fromWei(web3.eth.getBalance(context.from), 'ether');
-        result['text-message'] = 'Man, you (0x' + context.from + ') have ' + balance.toString() + ' ETH, you filthy animal!';
-    } catch (e) {
-        result.err = e;
-    }
-
-    try {
-        var URL = 'http://www.google.com/';
-
-        fetch(URL).then(function (data) {
-            result.data = data;
-            status.sendMessage('Done!');
-        }).catch(function (e) {
-            result.err = e;
-            status.sendMessage('Failed!');
-        });
-    } catch (e) {
-        result.err = e;
-        status.sendMessage('Error!');
-    }
-
+    console.log('Bot here');
 
     return result;
 });
@@ -54,7 +72,11 @@ status.command({
         return { markup: status.components.view({}, [text]) };
     },
     handler: function (params) {
-        status.sendMessage('No status to report');
+        var data = fetchLocalData();
+
+        for (var tx in data) {
+            status.sendMessage('Transaction that needs confirmation: ' + tx);
+        };
     }
 });
 
@@ -121,4 +143,3 @@ status.command({
 //     // Give back the whole thing inside an object.
 //     return {markup: view};
 // }
-
