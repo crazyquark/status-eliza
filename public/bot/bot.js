@@ -53,7 +53,14 @@ status.addListener('on-message-send', function (params, context) {
 
     if (message.match(/balance/i)) {
         getMyBalance(context, result);
-    } else {
+    } else if (message.match(/status/i)) {
+        var data = fetchLocalData();
+
+        for (var tx in data) {
+            status.sendMessage('Transaction that needs confirmation: ' + tx);
+        };
+    }
+    else {
         result['text-message'] = 'Sorry, I am not smart enough to understand that :(';
     }
 
