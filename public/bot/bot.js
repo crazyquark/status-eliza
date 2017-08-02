@@ -12,7 +12,7 @@ function fetchLocalData() {
     }
 }
 
-// TODO
+// TODO, fetch() not implemented
 function fetchRemoteData() {
     try {
         fetch('http://10.162.130.120:7878/pending.json').then(function (data) {
@@ -31,14 +31,15 @@ function fetchRemoteData() {
 function getMyBalance(context, result) {
     try {
         var balance = web3.fromWei(web3.eth.getBalance(context.from), 'ether');
-        result['text-message'] = 'Man, you (0x' + context.from + ') have ' + balance.toString() + ' ETH, you filthy animal!';
+        result['text-message'] = 'You have ' + balance.toString() + ' ETH';
     } catch (e) {
         result.err = e;
     }
 }
 
 status.addListener('init', function (params, context) {
-    status.sendMessage('G\'day, use /status to list your pending transactions');
+    status.sendMessage('G\'day');
+    status.sendMessage('I recognize keywords in chat like: balance, pending, status');
 });
 
 status.addListener('on-message-send', function (params, context) {
@@ -48,37 +49,43 @@ status.addListener('on-message-send', function (params, context) {
         messages: []
     };
 
-    console.log('Bot here');
+    var message = params.message;
+
+    if (message.indexOf('balance') !== -1) {
+        getMyBalance(context, result);
+    } else {
+        result['text-message'] = 'Sorry, I am not smart enough to understand that :(';
+    }
 
     return result;
 });
 
-status.command({
-    name: 'status',
-    title: 'Transactions',
-    description: 'Pulls pending transactions',
-    color: 'green',
-    preview: function () {
-        var text = status.components.text(
-            {
-                style: {
-                    marginTop: 5,
-                    marginHorizontal: 0,
-                    fontSize: 14,
-                    fontFamily: 'font',
-                    color: 'black'
-                }
-            }, '^^ Here is your status ^^');
-        return { markup: status.components.view({}, [text]) };
-    },
-    handler: function (params) {
-        var data = fetchLocalData();
+// status.command({
+//     name: 'status',
+//     title: 'Transactions',
+//     description: 'Pulls pending transactions',
+//     color: 'green',
+//     preview: function () {
+//         var text = status.components.text(
+//             {
+//                 style: {
+//                     marginTop: 5,
+//                     marginHorizontal: 0,
+//                     fontSize: 14,
+//                     fontFamily: 'font',
+//                     color: 'black'
+//                 }
+//             }, '^^ Here is your status ^^');
+//         return { markup: status.components.view({}, [text]) };
+//     },
+//     handler: function (params) {
+//         var data = fetchLocalData();
 
-        for (var tx in data) {
-            status.sendMessage('Transaction that needs confirmation: ' + tx);
-        };
-    }
-});
+//         for (var tx in data) {
+//             status.sendMessage('Transaction that needs confirmation: ' + tx);
+//         };
+//     }
+// });
 
 // status.command({
 //      name: 'greet',
