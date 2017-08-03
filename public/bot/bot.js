@@ -94,7 +94,7 @@ status.addListener('on-message-send', function (params, context) {
                 if (!txStatus) {
                     result['text-message'] += '\nIf you want to confirm this transaction use the /confirm command';
                 } else {
-                    result['text-message'] += '\nThis transaction is already confirmed. Thank you!'];
+                    result['text-message'] += '\nThis transaction is already confirmed. Thank you!';
                 }
             } else {
                 result['text-message'] = 'I am not aware of a transaction with the ID ' + txid;
