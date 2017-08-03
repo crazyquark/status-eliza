@@ -105,17 +105,25 @@ status.addListener('on-message-send', function (params, context) {
 });
 
 status.command({
-     name: 'confirm',
-     title: 'Confirm',
-     description: 'Confirm transaction',
-     color: 'green',
-     sequentialParams: true,
-     params: [{
-              name: 'txid',
-              type: status.types.NUMBER,
-              placeholder: 'transaction number'
-             }],
-    preview: function(params, context) {
-        return {markup: status.components.text({}, 'Confirm transaction ' + params.txid )};
+    name: 'confirm',
+    title: 'Confirm',
+    description: 'Confirm transaction',
+    color: 'green',
+    sequentialParams: true,
+    params: [{
+        name: 'txid',
+        type: status.types.NUMBER,
+        placeholder: 'transaction number'
+    }],
+    preview: function (params, context) {
+        return { markup: status.components.text({}, 'Confirm transaction ' + params.txid) };
+    },
+    handler: function (params, context) {
+        try {
+            var txStatus = contract.getTransactionStatus(params.txid);
+            console.log(txStatus);
+        } catch (e) {
+            console.log(e);
+        }
     }
- });
+});
