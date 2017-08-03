@@ -8,7 +8,6 @@ var contractAbi =
 
 var contract = web3.eth.contract(contractAbi).at(contractAddress);
 
-
 function fetchLocalData() {
     return {
         49014:
@@ -56,11 +55,13 @@ function getMyPendingTxs(result) {
         if (tx)
             result['text-message'] += '\nPending transaction: ' + tx;
     };
+
+    result['text-message'] += '\n\nTo get more details about any transaction type its ID number here';
 }
 
 status.addListener('init', function (params, context) {
     status.sendMessage('G\'day');
-    status.sendMessage('I recognize keywords in chat like: balance, account, status');
+    status.sendMessage('I recognize keywords in chat like: balance, account, status, transaction IDs');
     status.sendMessage('For everything else, my friend Eliza will be as unhelpful as possible :)')
     eliza.start();
 });
@@ -73,25 +74,52 @@ status.addListener('on-message-send', function (params, context) {
     };
 
     var message = params.message;
+    var txid;
 
     if (message.match(/balance/i)) {
         getMyBalance(context, result);
     } else if (message.match(/status/i)) {
         getMyPendingTxs(result);
     } else if (message.match(/account/i)) {
-        try {
-            console.log(web3.eth.contract(contractAbi));
-        } catch (e) {
-            result.err = e;
-        }
-
         result['text-message'] = 'Your account is 0x' + context.from;
     } else {
-        result['text-message'] = eliza.reply(message);
+        txid = message.match(/[1-9]+[0-9]*/);
+        if (txid) {
+            var txs = fetchLocalData();
+            var tx = txs[txid];
+            if (tx) {
+                result['text-message'] = 'Here are the transaction details for ' + txid + ' : \n' + tx.details + '\n\n';
+
+                var txStatus = contract.getTransactionStatus(txid);
+                if (!txStatus) {
+                    result['text-message'] += '\nIf you want to confirm this transaction use the /confirm command';
+                } else {
+                    result['text-message'] += '\nThis transaction is already confirmed. Thank you!'];
+                }
+            } else {
+                result['text-message'] = 'I am not aware of a transaction with the ID ' + txid;
+            }
+        } else {
+            // Take it away Eliza
+            result['text-message'] = eliza.reply(message);
+        }
     }
 
     return result;
 });
+
+// status.command({
+//     name: 'confirm',
+//     title: 'Confirm',
+//     description: 'Confirm a transaction',
+//     color: 'green',
+//     params: [{
+//         name: 'txid',
+//         type: status.tyoes.NUMBER,
+//         suggestions: getPendingTransactionSuggestions
+//     }]
+// });
+
 
 // --------------------------------------------------------------------------------------
 
