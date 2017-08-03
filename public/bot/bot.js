@@ -1,5 +1,14 @@
 var eliza = {};
 
+// Created with Remix IDE and Metamask on Ropsten
+var contractAddress = '0x03749a095ec23d8108f7338b09ced562db0195b7';
+var contractOwner = '0x53022f4f4e8672c56499eb6b69bf62d727b6d071';
+var contractAbi =
+    [{ "constant": true, "inputs": [{ "name": "_txid", "type": "uint256" }], "name": "getTransactionStatus", "outputs": [{ "name": "", "type": "bool" }], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "_user", "type": "address" }, { "name": "_txid", "type": "uint256" }], "name": "addTransaction", "outputs": [], "payable": false, "type": "function" }, { "constant": true, "inputs": [], "name": "owner", "outputs": [{ "name": "", "type": "address" }], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "_txid", "type": "uint256" }], "name": "confirmTransaction", "outputs": [], "payable": false, "type": "function" }, { "inputs": [], "payable": false, "type": "constructor" }];
+
+var contract = web3.eth.contract(contractAbi).at(contractAddress);
+
+
 function fetchLocalData() {
     return {
         49014:
@@ -51,8 +60,8 @@ function getMyPendingTxs(result) {
 
 status.addListener('init', function (params, context) {
     status.sendMessage('G\'day');
-    status.sendMessage('I recognize keywords in chat like: balance, pending, status');
-
+    status.sendMessage('I recognize keywords in chat like: balance, account, status');
+    status.sendMessage('For everything else, my friend Eliza will be as unhelpful as possible :)')
     eliza.start();
 });
 
@@ -69,15 +78,24 @@ status.addListener('on-message-send', function (params, context) {
         getMyBalance(context, result);
     } else if (message.match(/status/i)) {
         getMyPendingTxs(result);
-    }
-    else {
+    } else if (message.match(/account/i)) {
+        try {
+            console.log(web3.eth.contract(contractAbi));
+        } catch (e) {
+            result.err = e;
+        }
+
+        result['text-message'] = 'Your account is 0x' + context.from;
+    } else {
         result['text-message'] = eliza.reply(message);
     }
 
     return result;
 });
 
-// --------------------------- ELIZA -----------------------------------------
+// --------------------------------------------------------------------------------------
+
+// --------------------------- ELIZA ----------------------------------------------------
 // Source: https://raw.githubusercontent.com/brandongmwong/elizabot-js/master/elizabot.js
 
 eliza.reply = function (r) {
