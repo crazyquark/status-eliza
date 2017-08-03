@@ -119,11 +119,12 @@ status.command({
         return { markup: status.components.text({}, 'Confirm transaction ' + params.txid) };
     },
     handler: function (params, context) {
+        status.sendMessage('Hold on');
         try {
             var txStatus = contract.getTransactionStatus(params.txid);
-            console.log(txStatus);
+            status.sendMessage('Looks like your tx is confirmation status is: ' + txStatus);
         } catch (e) {
-            console.log(e);
+            status.sendMessage('Boing, error' + e);
         }
     }
 });
