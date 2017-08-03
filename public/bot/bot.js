@@ -1,3 +1,5 @@
+var eliza = {};
+
 function fetchLocalData() {
     return {
         49014:
@@ -77,7 +79,7 @@ status.addListener('on-message-send', function (params, context) {
 
 // --------------------------- ELIZA -----------------------------------------
 // Source: https://raw.githubusercontent.com/brandongmwong/elizabot-js/master/elizabot.js
-var eliza = {};
+
 eliza.reply = function (r) {
     if (this.bot == null) {
         this.bot = new ElizaBot(false);
