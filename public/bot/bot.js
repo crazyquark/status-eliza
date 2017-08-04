@@ -1,5 +1,5 @@
 // Created with Remix IDE and Metamask on Ropsten
-var contractAddress = '0x16c5273e501a51e48464e71c94cb3dd3c8b9a289';
+var contractAddress = '0x07a5e64f13e608509ad5c60e4d7f975b28ae155b';
 var contractOwner = '0x53022f4f4e8672c56499eb6b69bf62d727b6d071';
 var contractAbi =
     [{ "constant": true, "inputs": [{ "name": "_user", "type": "address" }, { "name": "_txid", "type": "uint256" }], "name": "existsOwner", "outputs": [{ "name": "", "type": "bool" }], "payable": false, "type": "function" }, { "constant": true, "inputs": [{ "name": "_txid", "type": "uint256" }], "name": "exists", "outputs": [{ "name": "", "type": "bool" }], "payable": false, "type": "function" }, { "constant": true, "inputs": [{ "name": "_txid", "type": "uint256" }], "name": "getTransactionStatus", "outputs": [{ "name": "", "type": "bool" }], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "_user", "type": "address" }, { "name": "_txid", "type": "uint256" }], "name": "addTransaction", "outputs": [], "payable": false, "type": "function" }, { "constant": true, "inputs": [], "name": "owner", "outputs": [{ "name": "", "type": "address" }], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "_txid", "type": "uint256" }], "name": "confirmTransaction", "outputs": [], "payable": false, "type": "function" }, { "constant": true, "inputs": [{ "name": "_user", "type": "address" }, { "name": "_txid", "type": "uint256" }], "name": "getTransactionStatusOwner", "outputs": [{ "name": "", "type": "bool" }], "payable": false, "type": "function" }, { "inputs": [], "payable": false, "type": "constructor" }];
@@ -9,13 +9,13 @@ var contract = web3.eth.contract(contractAbi).at(contractAddress);
 
 function fetchLocalData() {
     return {
-        49014:
+        23011:
         {
-            details: 'The bank will pay for this transaction upon approval',
+            details: 'You bought 8.375.394,75 INR against 100.000,00 GBP with value date 04-8-2017 with the following exchange rate 1 GBP = 83,7539 INR.',
         },
-        78900:
+        14055:
         {
-            details: 'Please confirm you want your funds transfered out of account RX566900'
+            details: 'You sold 5.750,00 CNY against 94.242,99 JPY with value date 04-08-2017 at the following exchange rate 1 CNY = 16.3901 JPY'
         }
     }
 }
@@ -48,11 +48,11 @@ function getMyBalance(context, result) {
 function getMyPendingTxs(result) {
     var data = fetchLocalData();
 
-    result['text-message'] = ('Let\'s see if I have anything for you...\n');
+    result['text-message'] = ('Here are your current transactions:\n');
 
     for (var tx in data) {
         if (tx)
-            result['text-message'] += '\nPending transaction: ' + tx;
+            result['text-message'] += '\nTransaction: ' + tx;
     };
 
     result['text-message'] += '\n\nTo get more details about any transaction type its ID number here';
@@ -81,7 +81,7 @@ status.addListener('on-message-send', function (params, context) {
     } else if (message.match(/account/i)) {
         result['text-message'] = 'Your account is 0x' + context.from;
     } else if (message.match(/contract/i)) {
-        result['text-message'] = 'We are currently using contract at 0x' + contractAddress; 
+        result['text-message'] = 'We are currently using the contract at ' + contractAddress;
     } else {
         txid = message.match(/[1-9]+[0-9]*/);
         if (txid) {
@@ -137,29 +137,11 @@ status.command({
             if (!exists) {
                 return status.sendMessage('Seems this transaction does not exist in our smart contract');
             }
-            
-            var txHash = contract.confirmTransaction(params.txid);
-            var receipt = waitForMining(txHash);
-            if (receipt.failed) {
-                return status.sendMessage('Sorry, your transaction could not be dialed at this moment, please try again later');
-            } 
 
-            status.sendMessage('Good news, your transaction was confirmed!');
+            contract.confirmTransaction(params.txid, { from: context.from });
         } catch (e) {
-            status.sendMessage('Boing, error' + e);
+            status.sendMessage('Boing, error: ' + e);
         }
     }
 });
 
-// Shamelesly stolen from: https://github.com/status-im/hackathon/blob/master/submissions/Dr.%20WeTrust/public/bot/bot.js
-function waitForMining(txHash) {
-    var mined = false
-    var receipt
-    while (!mined) {
-        receipt = web3.eth.getTransactionReceipt(txHash)
-        if (!receipt) continue
-        if (receipt.contractAddress || receipt.gasUsed) mined = true
-        if (receipt.gasUsed === receipt.gasLimit) receipt.failed = true
-    }
-    return receipt
-}
