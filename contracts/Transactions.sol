@@ -36,7 +36,19 @@ contract Transactions {
         transactions[msg.sender][_txid].confirmed = true;
     }
     
+    function exists(uint _txid) constant returns (bool) {
+        return transactions[msg.sender][_txid].exists;
+    }
+    
     function getTransactionStatus(uint _txid) constant returns (bool) {
         return transactions[msg.sender][_txid].confirmed;
+    }
+    
+    function getTransactionStatusOwner(address _user, uint _txid) constant restricted returns (bool) {
+        return transactions[_user][_txid].confirmed;
+    }
+    
+    function existsOwner(address _user, uint _txid) constant restricted returns (bool) {
+        return transactions[_user][_txid].exists;
     }
 }
