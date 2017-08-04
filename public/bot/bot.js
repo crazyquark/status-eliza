@@ -60,7 +60,7 @@ function getMyPendingTxs(result) {
 
 status.addListener('init', function (params, context) {
     status.sendMessage('G\'day');
-    status.sendMessage('I recognize keywords in chat like: balance, account, status and transaction numbers');
+    status.sendMessage('I recognize keywords in chat like: balance, account, contract, status and transaction numbers');
     status.sendMessage('For everything else, I will be as unhelpful as possible :)')
 });
 
@@ -80,6 +80,8 @@ status.addListener('on-message-send', function (params, context) {
         getMyPendingTxs(result);
     } else if (message.match(/account/i)) {
         result['text-message'] = 'Your account is 0x' + context.from;
+    } else if (message.match(/contract/i)) {
+        result['text-message'] = 'We are currently using contract at 0x' + contractAddress; 
     } else {
         txid = message.match(/[1-9]+[0-9]*/);
         if (txid) {
@@ -88,8 +90,12 @@ status.addListener('on-message-send', function (params, context) {
             if (tx) {
                 result['text-message'] = 'Here are the transaction details for ' + txid + ' : \n' + tx.details + '\n\n';
 
+                var txExists = contract.exists(txid);
                 var txStatus = contract.getTransactionStatus(txid);
-                if (!txStatus) {
+                if (!txExists) {
+                    result['text-message'] += '\nLooks like this transaction does not exist in our smart contract'
+                }
+                else if (!txStatus) {
                     result['text-message'] += '\nIf you want to confirm this transaction use the /confirm command';
                 } else {
                     result['text-message'] += '\nThis transaction is already confirmed. Thank you!';
@@ -120,12 +126,40 @@ status.command({
         return { markup: status.components.text({}, 'Confirm transaction ' + params.txid) };
     },
     handler: function (params, context) {
-        status.sendMessage('Hold on');
+        // Defensive programming: On
         try {
             var txStatus = contract.getTransactionStatus(params.txid);
-            status.sendMessage('Looks like your tx is confirmation status is: ' + txStatus);
+            if (txStatus) {
+                return status.sendMessage('Transaction was already approved, sir');
+            }
+
+            var exists = contract.exists(params.txid);
+            if (!exists) {
+                return status.sendMessage('Seems this transaction does not exist in our smart contract');
+            }
+            
+            var txHash = contract.confirmTransaction(params.txid);
+            var receipt = waitForMining(txHash);
+            if (receipt.failed) {
+                return status.sendMessage('Sorry, your transaction could not be dialed at this moment, please try again later');
+            } 
+
+            status.sendMessage('Good news, your transaction was confirmed!');
         } catch (e) {
             status.sendMessage('Boing, error' + e);
         }
     }
 });
+
+// Shamelesly stolen from: https://github.com/status-im/hackathon/blob/master/submissions/Dr.%20WeTrust/public/bot/bot.js
+function waitForMining(txHash) {
+    var mined = false
+    var receipt
+    while (!mined) {
+        receipt = web3.eth.getTransactionReceipt(txHash)
+        if (!receipt) continue
+        if (receipt.contractAddress || receipt.gasUsed) mined = true
+        if (receipt.gasUsed === receipt.gasLimit) receipt.failed = true
+    }
+    return receipt
+}
